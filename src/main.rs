@@ -32,9 +32,12 @@ impl<'r> FromRequest<'r> for Subdomain<'r> {
 
 #[get("/<file..>")]
 async fn files(file: PathBuf, subdomain: Subdomain<'_>) -> Option<NamedFile> {
-    NamedFile::open(Path::new("site/").join(subdomain.0).join(file))
-        .await
-        .ok()
+    let path = Path::new("site/").join(subdomain.0).join(file);
+    if path.is_file() {
+        NamedFile::open(&path).await.ok()
+    } else {
+        NamedFile::open(path.join("index.html")).await.ok()
+    }
 }
 
 #[launch]
