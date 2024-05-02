@@ -41,12 +41,13 @@ async fn files(file: PathBuf, subdomain: Subdomain<'_>) -> Option<NamedFile> {
 }
 
 #[post("/reset-password", data = "<password>")]
-async fn set_password(username: AuthGuard, password: String) -> Result<(), &'static str> {
+async fn set_password(username: AuthGuard, password: String) -> Result<&'static str, &'static str> {
     if password.len() < 8 {
         return Err("Password must be at least 8 characters long");
     }
+    println!("{}", password);
     match reset_password(&username.0, &password) {
-        Ok(_) => Ok(()),
+        Ok(_) => Ok("Successfully changed password"),
         Err(_) => Err("Reset password failed"),
     }
 }

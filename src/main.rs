@@ -1,11 +1,10 @@
-use bleebo::{server, users::insert_new_user};
+use bleebo::{client::change_password, server, users::insert_new_user};
 use clap::{Parser, Subcommand};
 
 /// Bleebo
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    /// Name of the person to greet
     #[command(subcommand)]
     command: Commands,
 
@@ -16,6 +15,18 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
+    /// Run server commands
+    Server {
+        #[command(subcommand)]
+        command: ServerCommands,
+    },
+
+    /// Change your password
+    ChangePassword,
+}
+
+#[derive(Subcommand, Debug)]
+enum ServerCommands {
     /// Start the server
     Start,
 
@@ -30,13 +41,18 @@ async fn main() -> Result<(), rocket::Error> {
     // You can check for the existence of subcommands, and if found use their
     // matches just as you would the top level cmd
     match &cli.command {
-        Commands::Start => {
-            server::build().launch().await?;
-        }
-        Commands::NewUser { username } => match insert_new_user(username) {
-            Ok(password) => println!("Added user {username} with temporary password {password}"),
-            Err(e) => println!("Failed to add user with error: {}", e),
+        Commands::Server { command } => match command {
+            ServerCommands::Start => {
+                server::build().launch().await?;
+            }
+            ServerCommands::NewUser { username } => match insert_new_user(username) {
+                Ok(password) => {
+                    println!("Added user {username} with temporary password {password}")
+                }
+                Err(e) => println!("Failed to add user with error: {}", e),
+            },
         },
+        Commands::ChangePassword => change_password(),
     }
 
     Ok(())

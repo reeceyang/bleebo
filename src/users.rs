@@ -1,11 +1,7 @@
 use std::error;
 
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
-    Argon2,
-};
 use passwords::PasswordGenerator;
-use rusqlite::{params, Connection, Error};
+use rusqlite::{params, Connection};
 
 use crate::{password::hash_password, DB};
 
