@@ -9,7 +9,7 @@ use std::str;
 
 use crate::{auth_guard::AuthGuard, users::reset_password};
 
-const BASE_HOST_SUFFIX: &str = ".bleebo.reeceyang.xyz";
+const BASE_HOST_SUFFIX: &str = ".bleebo.dev";
 struct Subdomain<'r>(&'r str);
 
 #[rocket::async_trait]
@@ -52,7 +52,7 @@ async fn set_password(username: AuthGuard, password: String) -> Result<&'static 
     }
 }
 
-#[get("/")]
+#[get("/", rank = 2)]
 async fn home() -> &'static str {
     "🦈"
 }
