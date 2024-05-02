@@ -6,13 +6,10 @@ use rocket::{
 use rocket_authorization::{basic::Basic, Credential};
 use rusqlite::{params, Connection};
 
-#[derive(Debug)]
-pub struct AuthGuard(pub String);
+use crate::{password::verify_password, users::User, DB};
 
 #[derive(Debug)]
-struct User {
-    username: String,
-}
+pub struct AuthGuard(pub String);
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthGuard {
@@ -24,19 +21,20 @@ impl<'r> FromRequest<'r> for AuthGuard {
             Outcome::Error(error) => return Outcome::Error((error.0, ())),
             Outcome::Forward(status) => return Outcome::Forward(status),
         };
-
-        let conn = match Connection::open("db") {
+        let conn = match Connection::open(DB) {
             Ok(conn) => conn,
             Err(_) => return Outcome::Error((Status::InternalServerError, ())),
         };
 
-        let mut stmt = match conn.prepare("SELECT username FROM users WHERE username = ?1") {
+        let mut stmt = match conn.prepare("SELECT * FROM users WHERE username = ?1") {
             Ok(stmt) => stmt,
             Err(_) => return Outcome::Error((Status::InternalServerError, ())),
         };
         let mut users_iter = match stmt.query_map(params![&provided_auth.username], |row| {
             Ok(User {
                 username: row.get(0)?,
+                password_hash: row.get(1)?,
+                reset_password: row.get(2)?,
             })
         }) {
             Ok(users_iter) => users_iter,
@@ -54,6 +52,9 @@ impl<'r> FromRequest<'r> for AuthGuard {
         };
 
         // TODO: check the password
-        Outcome::Success(AuthGuard(user.username))
+        match verify_password(&provided_auth.password, &user.password_hash) {
+            Ok(_) => Outcome::Success(AuthGuard(user.username)),
+            Err(_) => Outcome::Error((Status::Unauthorized, ())),
+        }
     }
 }

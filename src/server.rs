@@ -7,7 +7,7 @@ use rocket::{
 use std::path::{Path, PathBuf};
 use std::str;
 
-use crate::auth_guard::AuthGuard;
+use crate::{auth_guard::AuthGuard, users::reset_password};
 
 const BASE_HOST_SUFFIX: &str = ".bleebo.reeceyang.xyz";
 struct Subdomain<'r>(&'r str);
@@ -40,9 +40,15 @@ async fn files(file: PathBuf, subdomain: Subdomain<'_>) -> Option<NamedFile> {
     }
 }
 
-#[post("/set-password")]
-async fn set_password(username: AuthGuard) -> String {
-    username.0.clone()
+#[post("/reset-password", data = "<password>")]
+async fn set_password(username: AuthGuard, password: String) -> Result<(), &'static str> {
+    if password.len() < 8 {
+        return Err("Password must be at least 8 characters long");
+    }
+    match reset_password(&username.0, &password) {
+        Ok(_) => Ok(()),
+        Err(_) => Err("Reset password failed"),
+    }
 }
 
 #[get("/")]

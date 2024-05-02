@@ -9,3 +9,6 @@ edition = "2021"
 rocket = "0.5.0"
 rocket-authorization = "1.0.0"
 rusqlite = { version = "0.31.0", features = ["bundled"] }
+argon2 = "0.5.3"
+passwords = "3.1.16"
+clap = { version = "4.5.4", features = ["derive"] }
