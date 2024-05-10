@@ -6,7 +6,7 @@ use std::{
 
 use dialoguer::{Input, Password};
 
-const SERVER_HOST: &'static str = "http://localhost:8080";
+const SERVER_HOST: &'static str = "https://bleebo.dev";
 
 struct Auth {
     username: String,
@@ -64,6 +64,14 @@ pub fn upload(site_name: &str) {
             for entry in fs::read_dir(dir)? {
                 let entry = entry?;
                 let path = entry.path();
+                if path
+                    .file_stem()
+                    .and_then(|stem| stem.to_str())
+                    .is_some_and(|stem| stem.starts_with("."))
+                {
+                    // skip dot files and directories
+                    continue;
+                }
                 if path.is_dir() {
                     visit_dirs(&path, site_name, &auth)?;
                 } else {
