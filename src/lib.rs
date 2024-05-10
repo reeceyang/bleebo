@@ -10,4 +10,4 @@ pub mod users;
 const DB: &'static str = "db";
 
 // be careful when setting this!
-const SITES_FOLDER: &'static str = "sites";
+const SITES_FOLDER: &'static str = "site";

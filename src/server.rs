@@ -52,7 +52,6 @@ async fn set_password(username: AuthGuard, password: String) -> Result<&'static 
     if password.len() < 8 {
         return Err("Password must be at least 8 characters long");
     }
-    println!("{}", password);
     match reset_password(&username.0, &password) {
         Ok(_) => Ok("Successfully changed password"),
         Err(_) => Err("Reset password failed"),
@@ -98,7 +97,7 @@ async fn upload(username: AuthGuard, path: PathBuf, mut file: TempFile<'_>) -> s
             "could not get site parent",
         ))?),
     )?;
-    file.persist_to(Path::new(SITES_FOLDER).join(path)).await
+    file.persist_to(Path::new(SITES_FOLDER).join(&path)).await
 }
 
 #[post("/delete/<site_name>")]
