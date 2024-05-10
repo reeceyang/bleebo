@@ -6,7 +6,7 @@ use std::{
 
 use dialoguer::{Input, Password};
 
-const SERVER_HOST: &'static str = "https://bleebo.dev";
+use crate::SERVER_HOST;
 
 struct Auth {
     username: String,

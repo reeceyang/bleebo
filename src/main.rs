@@ -5,16 +5,12 @@ use bleebo::{
 };
 use clap::{Parser, Subcommand};
 
-/// Bleebo
+/// bleebo
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
-
-    /// Number of times to greet
-    #[arg(short, long, default_value_t = 1)]
-    count: u8,
 }
 
 #[derive(Subcommand, Debug)]

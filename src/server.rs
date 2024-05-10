@@ -13,10 +13,9 @@ use std::{fs::remove_dir_all, str};
 use crate::{
     auth_guard::AuthGuard,
     users::{get_site_owner, get_user_sites, insert_site, reset_password, Site},
-    SITES_FOLDER,
+    BASE_HOST_SUFFIX, SITES_FOLDER,
 };
 
-const BASE_HOST_SUFFIX: &str = ".bleebo.dev";
 struct Subdomain<'r>(&'r str);
 
 #[rocket::async_trait]
