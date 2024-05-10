@@ -1,5 +1,6 @@
 use std::error;
 
+use anyhow::bail;
 use passwords::PasswordGenerator;
 use rusqlite::{params, Connection};
 
@@ -56,4 +57,54 @@ pub fn reset_password(username: &str, password: &str) -> Result<(), Box<dyn erro
     )?;
 
     Ok(())
+}
+
+pub fn insert_site(username: &str, sitename: &str) -> Result<(), Box<dyn error::Error>> {
+    let conn = Connection::open(DB)?;
+
+    conn.execute(
+        "INSERT INTO sites VALUES (?1, ?2)",
+        params![sitename, username],
+    )?;
+
+    Ok(())
+}
+
+#[derive(PartialEq, Eq)]
+pub struct Site {
+    pub site_name: String,
+    pub owner_name: String,
+}
+pub fn get_user_sites(username: &str) -> Result<Vec<Site>, anyhow::Error> {
+    let conn = Connection::open(DB)?;
+
+    let mut stmt = conn.prepare("SELECT * FROM sites WHERE owner_name = ?1")?;
+    let sites_iter = stmt.query_map(params![username], |row| {
+        Ok(Site {
+            site_name: row.get(0)?,
+            owner_name: row.get(1)?,
+        })
+    })?;
+
+    let sites = sites_iter.filter_map(|x| x.ok()).collect();
+
+    Ok(sites)
+}
+
+pub fn get_site_owner(site_name: &str) -> Result<Option<String>, anyhow::Error> {
+    let conn = Connection::open(DB)?;
+
+    let mut stmt = conn.prepare("SELECT * FROM sites WHERE site_name = ?1")?;
+    let sites_iter = stmt.query_map(params![site_name], |row| {
+        Ok(Site {
+            site_name: row.get(0)?,
+            owner_name: row.get(1)?,
+        })
+    })?;
+
+    let sites: Vec<_> = sites_iter.filter_map(|x| x.ok()).collect();
+    if sites.len() > 1 {
+        bail!("there should only be one site with the name {}", site_name)
+    }
+    return Ok(sites.get(0).and_then(|site| Some(site.owner_name.clone())));
 }

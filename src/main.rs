@@ -1,4 +1,8 @@
-use bleebo::{client::change_password, server, users::insert_new_user};
+use bleebo::{
+    client::{change_password, delete, upload},
+    server,
+    users::insert_new_user,
+};
 use clap::{Parser, Subcommand};
 
 /// Bleebo
@@ -23,6 +27,12 @@ enum Commands {
 
     /// Change your password
     ChangePassword,
+
+    /// Upload the current directory
+    Upload { site_name: String },
+
+    /// Delete a site
+    Delete { site_name: String },
 }
 
 #[derive(Subcommand, Debug)]
@@ -53,6 +63,8 @@ async fn main() -> Result<(), rocket::Error> {
             },
         },
         Commands::ChangePassword => change_password(),
+        Commands::Upload { site_name } => upload(&site_name),
+        Commands::Delete { site_name } => delete(&site_name),
     }
 
     Ok(())
